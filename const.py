@@ -40,12 +40,12 @@ LOG_CONFIG = {
             'backupCount': 5,
             'formatter': 'colored',
             'filename': 'default.log',
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     },
     'loggers': {
         '': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'handlers': [
                 'default',
             ],

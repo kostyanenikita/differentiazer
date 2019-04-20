@@ -49,8 +49,7 @@ class UserURL(Base):
 
     chat_id = Column(Integer, primary_key=True)
     url = Column(Text, primary_key=True)
-    html = Column(Text)
-    difference = Column(Text)
+    hash = Column(Text)
 
 
 class UserToken(Base):

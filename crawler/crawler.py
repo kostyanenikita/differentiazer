@@ -6,7 +6,7 @@ import argparse
 import logging.config
 import requests
 import telebot
-from difflib import ndiff
+from hashlib import md5
 
 from const import HEADERS, LOG_CONFIG
 from models import UserURL, db_transaction, session
@@ -29,20 +29,18 @@ if __name__ == '__main__':
 
     for model in models:
         response = requests.get(url=model.url, headers=HEADERS)
+        logger.info("checking url = {0} for chat_id = {1}".format(model.url, model.chat_id))
 
-        if model.html is not None:
-            diff = ndiff(
-                model.html.splitlines(keepends=True),
-                response.text.splitlines(keepends=True))
-            diff = ''.join(filter(lambda x: x.startswith(('-', '+', '?')), diff))
+        m = md5()
+        m.update(response.text.encode('utf-8'))
+        if m.hexdigest() == model.hash:
+            continue
 
-            logger.info("for chat_id = {0} and url = {1} diff is ".format(model.chat_id, model.url) +
-                        ('NOT empty' if diff else 'empty'))
+        if model.hash is not None:
+            logger.info("for chat_id = {0} url = {1} was changed".format(model.chat_id, model.url))
+            bot.send_message(model.chat_id, "url = {0} was changed".format(model.url))
 
-            if diff:
-                bot.send_message(model.chat_id, diff)
-
-        model.html = response.text
+        model.hash = m.hexdigest()
         with db_transaction(session):
             session.add(model)
 
